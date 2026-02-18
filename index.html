@@ -6,7 +6,7 @@
     <title>Ferramentas BIM</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3061/3061341.png" type="image/png">
     
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.min.js"></script>
 
     <style>
         /* ================= VARIÁVEIS & TEMA ================= */
@@ -263,90 +263,107 @@
 
     let currentData = [];
 
-    // ==========================================
-    // FUNÇÃO DE EXPORTAÇÃO EXCEL
-    // ==========================================
-    function exportToExcel() {
-        if (currentData.length === 0) {
-            alert("Não há dados para exportar.");
-            return;
-        }
+// ==========================================
+// FUNÇÃO DE EXPORTAÇÃO EXCEL (CORRIGIDA)
+// ==========================================
+function exportToExcel() {
+    // 1. Verificações de Segurança
+    if (typeof XLSX === 'undefined') {
+        alert("Erro: A biblioteca do Excel não carregou. Verifique sua conexão com a internet ou o bloqueio de scripts.");
+        return;
+    }
 
-        // 1. Preparar os dados para o formato Excel
+    if (!currentData || currentData.length === 0) {
+        alert("Não há dados na tabela para exportar.");
+        return;
+    }
+
+    try {
+        console.log("Iniciando exportação...");
+
+        // 2. Preparar os dados (Matriz de Dados)
         const dataForExcel = currentData.map(item => {
             const dateObj = new Date(item.date);
+            const dateFormatted = isNaN(dateObj) ? "Data Inválida" : 
+                dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.toLocaleTimeString('pt-BR');
+            
             return [
-                item.title,
-                item.category,
+                item.title || "Sem Título",
+                item.category || "Geral",
                 item.author || "N/A",
-                dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.toLocaleTimeString('pt-BR'),
-                item.description
+                dateFormatted,
+                item.description || ""
             ];
         });
 
-        // Adicionar Cabeçalho
+        // Adicionar Cabeçalho na primeira linha
         const header = ["Título do Projeto", "Categoria", "Responsável", "Data", "Descrição Detalhada"];
         dataForExcel.unshift(header);
 
-        // 2. Criar Workbook e Worksheet
+        // 3. Criar Workbook e Worksheet
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(dataForExcel);
 
-        // 3. Estilização (Design Moderno)
-        
-        // Largura das Colunas (wpx = width em pixels)
+        // 4. Definição de Largura das Colunas (wch = width char count aprox)
         ws['!cols'] = [
-            { wch: 30 }, // Título
-            { wch: 15 }, // Categoria
-            { wch: 20 }, // Autor
-            { wch: 20 }, // Data
-            { wch: 80 }  // Descrição (Larga)
+            { wch: 35 }, // Título
+            { wch: 20 }, // Categoria
+            { wch: 25 }, // Responsável
+            { wch: 22 }, // Data
+            { wch: 100 } // Descrição (Bem larga)
         ];
 
-        // Aplicar Estilos Célula por Célula
+        // 5. Aplicar Estilos (Iterar sobre todas as células usadas)
         const range = XLSX.utils.decode_range(ws['!ref']);
         
         for (let R = range.s.r; R <= range.e.r; ++R) {
             for (let C = range.s.c; C <= range.e.c; ++C) {
                 const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                
+                // Se a célula não existe, pule
                 if (!ws[cellAddress]) continue;
 
-                // Estilo Base
+                // Estilo Base (Bordas + Alinhamento Topo + Quebra de Texto)
                 let style = {
                     font: { name: "Calibri", sz: 11 },
-                    alignment: { vertical: "top", wrapText: true }, // IMPORTANTE: wrapText faz a linha crescer
+                    alignment: { vertical: "top", wrapText: true }, 
                     border: {
-                        top: { style: "thin", color: { rgb: "E2E8F0" } },
-                        bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                        left: { style: "thin", color: { rgb: "E2E8F0" } },
-                        right: { style: "thin", color: { rgb: "E2E8F0" } }
+                        top: { style: "thin", color: { rgb: "CCCCCC" } },
+                        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+                        left: { style: "thin", color: { rgb: "CCCCCC" } },
+                        right: { style: "thin", color: { rgb: "CCCCCC" } }
                     }
                 };
 
-                // Estilo do Cabeçalho (Linha 0)
+                // Estilo Específico do Cabeçalho (Linha 0)
                 if (R === 0) {
-                    style.fill = { fgColor: { rgb: "0EA5E9" } }; // Azul do site
+                    style.fill = { fgColor: { rgb: "0EA5E9" } }; // Azul
                     style.font = { name: "Calibri", sz: 12, bold: true, color: { rgb: "FFFFFF" } };
-                    style.alignment = { horizontal: "center", vertical: "center" };
+                    style.alignment = { horizontal: "center", vertical: "center", wrapText: false };
                 } 
-                // Estilo das Linhas (Alternadas / Zebra)
+                // Estilo Zebrado (Linhas pares/ímpares)
                 else {
                     if (R % 2 === 0) {
-                        style.fill = { fgColor: { rgb: "F8FAFC" } }; // Cinza bem claro
+                        style.fill = { fgColor: { rgb: "F8FAFC" } }; // Cinza claro
                     } else {
                         style.fill = { fgColor: { rgb: "FFFFFF" } }; // Branco
                     }
                 }
 
+                // Aplica o estilo na célula
                 ws[cellAddress].s = style;
             }
         }
 
+        // 6. Anexar e Baixar
         XLSX.utils.book_append_sheet(wb, ws, "Projetos");
-
-        // 4. Download
-        XLSX.writeFile(wb, "Relatorio_Projetos.xlsx");
+        XLSX.writeFile(wb, "Relatorio_Projetos_Engenharia.xlsx");
+        
+    } catch (error) {
+        console.error("Erro na exportação:", error);
+        alert("Ocorreu um erro ao gerar o arquivo. Verifique o console (F12) para detalhes.");
     }
+}    
 
     // ==========================================
     // LÓGICA DO SISTEMA
