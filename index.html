@@ -15,11 +15,12 @@
             --container-bg: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --accent-color: #0ea5e9; /* Azul Engenharia */
+            --accent-color: #0ea5e9;
             --accent-hover: #0284c7;
             --danger-color: #ef4444;
             --edit-color: #f59e0b;
-            --success-color: #10b981; /* Verde Excel */
+            --success-color: #10b981;
+            --success-bg: #ecfdf5;
             --border-color: #e2e8f0;
             --input-bg: #f8fafc;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -35,6 +36,7 @@
             --accent-hover: #0ea5e9;
             --border-color: #334155;
             --input-bg: #334155;
+            --success-bg: #064e3b;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
 
@@ -49,7 +51,6 @@
 
         .container { max-width: 900px; margin: 0 auto; }
 
-        /* ================= HEADER ================= */
         header { 
             display: flex; 
             justify-content: space-between; 
@@ -60,7 +61,6 @@
         }
         
         .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-area svg { width: 32px; height: 32px; fill: var(--accent-color); }
         h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent-color); }
 
         .header-actions { display: flex; gap: 10px; }
@@ -77,7 +77,6 @@
         }
         .btn-header:hover { background-color: var(--border-color); }
 
-        /* Botão específico do Excel */
         .btn-excel {
             background-color: var(--success-color);
             color: white;
@@ -85,7 +84,6 @@
         }
         .btn-excel:hover { background-color: #059669; }
 
-        /* ================= FORMULÁRIO ================= */
         .card {
             background-color: var(--container-bg);
             padding: 2rem;
@@ -106,27 +104,23 @@
             border: 1px solid var(--border-color); background-color: var(--input-bg);
             color: var(--text-primary); font-size: 0.95rem;
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none; border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
-        }
 
         .hidden { display: none; }
+
+        .button-group { display: flex; gap: 10px; margin-top: 1rem; }
 
         button.btn-submit {
             background-color: var(--accent-color); color: white; border: none;
             padding: 0.75rem 1.5rem; border-radius: var(--radius);
-            font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem;
+            font-size: 1rem; font-weight: 600; cursor: pointer; flex: 2;
         }
         button.btn-submit:hover { background-color: var(--accent-hover); }
+
         button.btn-cancel {
-            background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color);
-            padding: 0.75rem; border-radius: var(--radius); cursor: pointer; width: 100%; margin-top: 0.5rem;
+            background-color: var(--bg-color); color: var(--text-secondary); border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem; border-radius: var(--radius); cursor: pointer; flex: 1; font-weight: 600;
         }
 
-        /* ================= LISTA COMPACTA ================= */
-        .suggestion-list { list-style: none; }
-        
         .suggestion-item {
             background-color: var(--container-bg);
             border-radius: var(--radius);
@@ -136,17 +130,20 @@
             overflow: hidden;
         }
 
-        /* Cabeçalho do Item */
+        /* Estilo Concluído */
+        .suggestion-item.completed {
+            border-color: var(--success-color);
+            background-color: var(--success-bg);
+        }
+
         .item-summary {
             padding: 1rem 1.5rem;
             display: grid;
-            grid-template-columns: 1fr auto auto; 
+            grid-template-columns: 1fr auto; 
             gap: 1rem;
             align-items: center;
             cursor: pointer;
-            background-color: var(--container-bg);
         }
-        .item-summary:hover { background-color: var(--input-bg); }
 
         .summary-main { display: flex; flex-direction: column; gap: 4px; }
         .item-title { font-weight: 700; font-size: 1.1rem; color: var(--text-primary); }
@@ -158,23 +155,23 @@
             font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
         }
 
-        /* Ações */
-        .item-actions { display: flex; gap: 8px; }
+        .item-actions { display: flex; gap: 8px; align-items: center; }
+        
         .action-btn {
-            background: none; border: none; cursor: pointer; padding: 6px;
+            background: none; border: 1px solid transparent; cursor: pointer; padding: 6px 10px;
             border-radius: 4px; color: var(--text-secondary);
-            display: flex; align-items: center; justify-content: center;
+            display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 600;
         }
-        .action-btn:hover { background-color: var(--border-color); }
-        .btn-edit:hover { color: var(--edit-color); }
-        .btn-delete:hover { color: var(--danger-color); }
+        .action-btn:hover { background-color: rgba(0,0,0,0.05); }
 
-        /* Detalhes */
+        .btn-complete { border-color: var(--border-color); }
+        .completed .btn-complete { color: var(--success-color); border-color: var(--success-color); }
+
         .item-details {
             display: none; 
             padding: 1.5rem;
             border-top: 1px solid var(--border-color);
-            background-color: var(--input-bg);
+            background-color: rgba(0,0,0,0.02);
             color: var(--text-secondary);
             line-height: 1.6;
             white-space: pre-wrap;
@@ -182,8 +179,6 @@
         .item-details.open { display: block; animation: fadeIn 0.3s; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Loading */
         #loading { display: none; text-align: center; margin-top: 10px; color: var(--accent-color); font-weight: bold; }
         .empty-state { text-align: center; color: var(--text-secondary); padding: 3rem; font-style: italic; }
 
@@ -194,14 +189,13 @@
 <div class="container">
     <header>
         <div class="logo-area">
-            <h1>Mural de sugestões para ferramentas BIM</h1>
+            <h1>Mural de sugestões BIM</h1>
         </div>
         
         <div class="header-actions">
             <button class="btn-header btn-excel" onclick="exportToExcel()">
                 <span>📊</span> Exportar Excel
             </button>
-            
             <button class="btn-header theme-toggle" onclick="toggleTheme()">
                 <span id="theme-icon">🌙</span> <span id="theme-text">Escuro</span>
             </button>
@@ -216,11 +210,11 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>Título do Item</label>
-                    <input type="text" id="title" required placeholder="Ex: Otimização estrutural do Galpão B">
+                    <input type="text" id="title" required placeholder="Ex: Script de verificação de colisões">
                 </div>
                 <div class="form-group">
                     <label>Responsável / Autor</label>
-                    <input type="text" id="author" placeholder="Ex: Eng. Carlos Silva">
+                    <input type="text" id="author" placeholder="Ex: André Sartor">
                 </div>
             </div>
 
@@ -240,13 +234,15 @@
             </div>
 
             <div class="form-group">
-                <label>Descrição Detalhada / Escopo</label>
-                <textarea id="description" rows="4" required placeholder="Descreva os detalhes técnicos, restrições ou sugestões de melhoria..."></textarea>
+                <label>Descrição Detalhada</label>
+                <textarea id="description" rows="4" required placeholder="Descreva os detalhes técnicos ou melhoria..."></textarea>
             </div>
 
-            <button type="submit" class="btn-submit" id="submitBtn">Salvar Registro</button>
-            <button type="button" class="btn-cancel hidden" id="cancelBtn" onclick="resetForm()">Cancelar Edição</button>
-            <div id="loading">Sincronizando com o servidor...</div>
+            <div class="button-group">
+                <button type="submit" class="btn-submit" id="submitBtn">Salvar Registro</button>
+                <button type="button" class="btn-cancel hidden" id="cancelBtn" onclick="resetForm()">Cancelar</button>
+            </div>
+            <div id="loading">Sincronizando...</div>
         </form>
     </div>
 
@@ -255,195 +251,61 @@
 </div>
 
 <script>
-    // ==========================================
-    // CREDENCIAIS RECUPERADAS (NÃO APAGUE)
-    // ==========================================
     const BIN_ID = '6995f62c43b1c97be9891b4b'; 
     const API_KEY = '$2a$10$T3C70qhYrKZMczxOir2xUeypvmxIZ89FRuioGyxBSh/gZorc4iBAy'; 
-    // ==========================================
 
     let currentData = [];
 
-// ==========================================
-// FUNÇÃO DE EXPORTAÇÃO EXCEL (CORRIGIDA)
-// ==========================================
-function exportToExcel() {
-    // 1. Verificações de Segurança
-    if (typeof XLSX === 'undefined') {
-        alert("Erro: A biblioteca do Excel não carregou. Verifique sua conexão com a internet ou o bloqueio de scripts.");
-        return;
-    }
-
-    if (!currentData || currentData.length === 0) {
-        alert("Não há dados na tabela para exportar.");
-        return;
-    }
-
-    try {
-        console.log("Iniciando exportação...");
-
-        // 2. Preparar os dados (Matriz de Dados)
-        const dataForExcel = currentData.map(item => {
-            const dateObj = new Date(item.date);
-            const dateFormatted = isNaN(dateObj) ? "Data Inválida" : 
-                dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.toLocaleTimeString('pt-BR');
-            
-            return [
-                item.title || "Sem Título",
-                item.category || "Geral",
-                item.author || "N/A",
-                dateFormatted,
-                item.description || ""
-            ];
-        });
-
-        // Adicionar Cabeçalho na primeira linha
-        const header = ["Título do Projeto", "Categoria", "Responsável", "Data", "Descrição Detalhada"];
+    function exportToExcel() {
+        if (typeof XLSX === 'undefined' || currentData.length === 0) return alert("Erro no carregamento ou lista vazia.");
+        const dataForExcel = currentData.map(item => [item.title, item.category, item.author, new Date(item.date).toLocaleString('pt-BR'), item.completed ? "Sim" : "Não", item.description]);
+        const header = ["Título", "Categoria", "Responsável", "Data", "Concluído", "Descrição"];
         dataForExcel.unshift(header);
-
-        // 3. Criar Workbook e Worksheet
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(dataForExcel);
-
-        // 4. Definição de Largura das Colunas (wch = width char count aprox)
-        ws['!cols'] = [
-            { wch: 35 }, // Título
-            { wch: 20 }, // Categoria
-            { wch: 25 }, // Responsável
-            { wch: 22 }, // Data
-            { wch: 100 } // Descrição (Bem larga)
-        ];
-
-        // 5. Aplicar Estilos (Iterar sobre todas as células usadas)
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        
-        for (let R = range.s.r; R <= range.e.r; ++R) {
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-                
-                // Se a célula não existe, pule
-                if (!ws[cellAddress]) continue;
-
-                // Estilo Base (Bordas + Alinhamento Topo + Quebra de Texto)
-                let style = {
-                    font: { name: "Calibri", sz: 11 },
-                    alignment: { vertical: "top", wrapText: true }, 
-                    border: {
-                        top: { style: "thin", color: { rgb: "CCCCCC" } },
-                        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-                        left: { style: "thin", color: { rgb: "CCCCCC" } },
-                        right: { style: "thin", color: { rgb: "CCCCCC" } }
-                    }
-                };
-
-                // Estilo Específico do Cabeçalho (Linha 0)
-                if (R === 0) {
-                    style.fill = { fgColor: { rgb: "0EA5E9" } }; // Azul
-                    style.font = { name: "Calibri", sz: 12, bold: true, color: { rgb: "FFFFFF" } };
-                    style.alignment = { horizontal: "center", vertical: "center", wrapText: false };
-                } 
-                // Estilo Zebrado (Linhas pares/ímpares)
-                else {
-                    if (R % 2 === 0) {
-                        style.fill = { fgColor: { rgb: "F8FAFC" } }; // Cinza claro
-                    } else {
-                        style.fill = { fgColor: { rgb: "FFFFFF" } }; // Branco
-                    }
-                }
-
-                // Aplica o estilo na célula
-                ws[cellAddress].s = style;
-            }
-        }
-
-        // 6. Anexar e Baixar
-        XLSX.utils.book_append_sheet(wb, ws, "Projetos");
-        XLSX.writeFile(wb, "Relatorio_Projetos_Engenharia.xlsx");
-        
-    } catch (error) {
-        console.error("Erro na exportação:", error);
-        alert("Ocorreu um erro ao gerar o arquivo. Verifique o console (F12) para detalhes.");
+        XLSX.utils.book_append_sheet(wb, ws, "Sugestões");
+        XLSX.writeFile(wb, "Relatorio_BIM.xlsx");
     }
-}    
 
-    // ==========================================
-    // LÓGICA DO SISTEMA
-    // ==========================================
-    
     function toggleCustomCategory() {
         const select = document.getElementById('category');
         const input = document.getElementById('customCategory');
-        if (select.value === 'Outro') {
-            input.classList.remove('hidden');
-            input.required = true;
-            input.focus();
-        } else {
-            input.classList.add('hidden');
-            input.required = false;
-        }
+        if (select.value === 'Outro') { input.classList.remove('hidden'); input.required = true; } 
+        else { input.classList.add('hidden'); input.required = false; }
     }
 
     async function fetchSuggestions() {
         try {
-            const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                headers: { 'X-Master-Key': API_KEY }
-            });
-            if (!response.ok) throw new Error('Erro ao buscar');
-            const data = await response.json();
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
+            const data = await res.json();
             currentData = data.record || [];
             renderList(currentData);
-        } catch (error) {
-            console.error(error);
-            document.getElementById('suggestionsList').innerHTML = '<div class="empty-state">Erro de conexão. Verifique a API Key.</div>';
-        }
+        } catch (e) { console.error(e); }
     }
 
     async function pushToBin(newData) {
-        const btn = document.getElementById('submitBtn');
-        const loading = document.getElementById('loading');
-        btn.disabled = true;
-        loading.style.display = 'block';
-
+        document.getElementById('loading').style.display = 'block';
         try {
-            const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': API_KEY
-                },
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
                 body: JSON.stringify(newData)
             });
-
-            if (!response.ok) throw new Error('Erro ao salvar');
             currentData = newData;
             renderList(currentData);
             resetForm();
-
-        } catch (error) {
-            alert("Erro ao salvar. Tente novamente.");
-            console.error(error);
-        } finally {
-            btn.disabled = false;
-            loading.style.display = 'none';
-        }
+        } catch (e) { alert("Erro ao sincronizar."); }
+        finally { document.getElementById('loading').style.display = 'none'; }
     }
 
     function renderList(list) {
         const container = document.getElementById('suggestionsList');
-        container.innerHTML = '';
-
-        if (!list || list.length === 0) {
-            container.innerHTML = '<div class="empty-state">Nenhum projeto cadastrado.</div>';
-            return;
-        }
+        container.innerHTML = list.length === 0 ? '<div class="empty-state">Nenhum registro encontrado.</div>' : '';
 
         list.forEach((item, index) => {
             const div = document.createElement('div');
-            div.className = 'suggestion-item';
+            div.className = `suggestion-item ${item.completed ? 'completed' : ''}`;
             
-            const dateObj = new Date(item.date);
-            const dateStr = dateObj.toLocaleDateString('pt-BR');
-
             div.innerHTML = `
                 <div class="item-summary" onclick="toggleDetails(this)">
                     <div class="summary-main">
@@ -451,94 +313,62 @@ function exportToExcel() {
                         <div class="item-meta">
                             <span class="badge">${escapeHtml(item.category)}</span>
                             <span>• ${escapeHtml(item.author || 'Anônimo')}</span>
-                            <span>• ${dateStr}</span>
                         </div>
                     </div>
-                    <div style="flex-grow:1"></div>
                     <div class="item-actions">
-                        <button class="action-btn btn-edit" title="Editar" onclick="prepareEdit(${index}, event)">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <button class="action-btn btn-complete" onclick="toggleComplete(${index}, event)">
+                            ${item.completed ? '✅ Concluída' : '⭕ Concluir'}
                         </button>
-                        <button class="action-btn btn-delete" title="Excluir" onclick="deleteItem(${index}, event)">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
+                        <button class="action-btn" title="Editar" onclick="prepareEdit(${index}, event)">✏️</button>
+                        <button class="action-btn" title="Excluir" onclick="deleteItem(${index}, event)">🗑️</button>
                     </div>
                 </div>
                 <div class="item-details">
-                    <strong>Descrição da sugestão:</strong><br>
-                    ${escapeHtml(item.description)}
+                    <strong>Detalhes:</strong><br>${escapeHtml(item.description)}
                 </div>
             `;
             container.appendChild(div);
         });
     }
 
-    function toggleDetails(element) {
-        const details = element.nextElementSibling;
-        details.classList.toggle('open');
+    async function toggleComplete(index, event) {
+        event.stopPropagation();
+        currentData[index].completed = !currentData[index].completed;
+        await pushToBin(currentData);
     }
 
     document.getElementById('suggestionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const catSelect = document.getElementById('category');
-        const catCustom = document.getElementById('customCategory');
-        const finalCategory = catSelect.value === 'Outro' ? catCustom.value : catSelect.value;
-
+        const cat = document.getElementById('category').value;
         const formData = {
             title: document.getElementById('title').value,
             author: document.getElementById('author').value,
-            category: finalCategory,
+            category: cat === 'Outro' ? document.getElementById('customCategory').value : cat,
             description: document.getElementById('description').value,
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            completed: false
         };
 
-        const editIndex = parseInt(document.getElementById('editIndex').value);
-        let newList = [...currentData];
-
-        if (editIndex >= 0) {
-            newList[editIndex] = formData;
+        const idx = parseInt(document.getElementById('editIndex').value);
+        if (idx >= 0) {
+            formData.completed = currentData[idx].completed;
+            currentData[idx] = formData;
         } else {
-            newList.unshift(formData);
+            currentData.unshift(formData);
         }
-
-        await pushToBin(newList);
+        await pushToBin(currentData);
     });
-
-    function deleteItem(index, event) {
-        event.stopPropagation();
-        if(!confirm('Tem certeza que deseja excluir este projeto?')) return;
-        let newList = [...currentData];
-        newList.splice(index, 1);
-        pushToBin(newList);
-    }
 
     function prepareEdit(index, event) {
         event.stopPropagation();
         const item = currentData[index];
-        
         document.getElementById('title').value = item.title;
         document.getElementById('author').value = item.author;
         document.getElementById('description').value = item.description;
-        
-        const select = document.getElementById('category');
-        const options = Array.from(select.options).map(o => o.value);
-        
-        if (options.includes(item.category)) {
-            select.value = item.category;
-            toggleCustomCategory();
-        } else {
-            select.value = 'Outro';
-            toggleCustomCategory();
-            document.getElementById('customCategory').value = item.category;
-        }
-
         document.getElementById('editIndex').value = index;
         document.getElementById('submitBtn').textContent = 'Atualizar Registro';
-        document.getElementById('submitBtn').style.backgroundColor = 'var(--edit-color)';
-        document.getElementById('formTitle').textContent = 'Editando Projeto';
+        document.getElementById('formTitle').textContent = 'Editando Sugestão';
         document.getElementById('cancelBtn').classList.remove('hidden');
-        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -546,41 +376,29 @@ function exportToExcel() {
         document.getElementById('suggestionForm').reset();
         document.getElementById('editIndex').value = "-1";
         document.getElementById('submitBtn').textContent = 'Salvar Registro';
-        document.getElementById('submitBtn').style.backgroundColor = 'var(--accent-color)';
         document.getElementById('formTitle').textContent = 'Nova sugestão de ferramenta BIM';
         document.getElementById('cancelBtn').classList.add('hidden');
         toggleCustomCategory();
     }
 
-    function escapeHtml(text) {
-        if (!text) return text;
-        return text.replace(/[&<>"']/g, function(m) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-        });
+    async function deleteItem(index, event) {
+        event.stopPropagation();
+        if(!confirm('Excluir esta sugestão?')) return;
+        currentData.splice(index, 1);
+        await pushToBin(currentData);
     }
 
-    function initTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-        updateThemeUI(savedTheme);
-    }
+    function toggleDetails(el) { el.nextElementSibling.classList.toggle('open'); }
+    function escapeHtml(t) { return t ? t.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])) : ''; }
+    
     function toggleTheme() {
-        const current = document.body.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
+        const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        updateThemeUI(next);
-    }
-    function updateThemeUI(theme) {
         const icon = document.getElementById('theme-icon');
-        const text = document.getElementById('theme-text');
-        if(theme === 'dark') { icon.textContent = '☀️'; text.textContent = 'Claro'; }
-        else { icon.textContent = '🌙'; text.textContent = 'Escuro'; }
+        icon.textContent = next === 'dark' ? '☀️' : '🌙';
     }
 
-    initTheme();
     fetchSuggestions();
-
 </script>
 </body>
 </html>
