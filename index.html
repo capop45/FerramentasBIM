@@ -167,6 +167,10 @@
         .btn-complete { border-color: var(--border-color); }
         .completed .btn-complete { color: var(--success-color); border-color: var(--success-color); }
 
+        /* Estilo Like */
+        .btn-like { border: 1px solid var(--border-color); }
+        .btn-like.curtido { color: var(--accent-color); border-color: var(--accent-color); background-color: rgba(14, 165, 233, 0.1); }
+
         .item-details {
             display: none; 
             padding: 1.5rem;
@@ -246,7 +250,7 @@
         </form>
     </div>
 
-    <h3 style="margin-bottom: 1rem; color: var(--text-secondary);">Registros Recentes</h3>
+    <h3 style="margin-bottom: 1rem; color: var(--text-secondary);">Registros</h3>
     <div id="suggestionsList" class="suggestion-list"></div>
 </div>
 
@@ -255,6 +259,17 @@
     const API_KEY = '$2a$10$T3C70qhYrKZMczxOir2xUeypvmxIZ89FRuioGyxBSh/gZorc4iBAy'; 
 
     let currentData = [];
+    let userIP = '';
+
+    async function getUserIP() {
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            userIP = data.ip;
+        } catch (e) {
+            userIP = 'unknown-' + Math.random().toString(16).slice(2);
+        }
+    }
 
     function exportToExcel() {
         if (typeof XLSX === 'undefined' || currentData.length === 0) return alert("Erro no carregamento ou lista vazia.");
@@ -303,6 +318,10 @@
         container.innerHTML = list.length === 0 ? '<div class="empty-state">Nenhum registro encontrado.</div>' : '';
 
         list.forEach((item, index) => {
+            const likes = item.likes || 0;
+            const likedBy = item.likedBy || [];
+            const hasLiked = likedBy.includes(userIP);
+
             const div = document.createElement('div');
             div.className = `suggestion-item ${item.completed ? 'completed' : ''}`;
             
@@ -316,6 +335,9 @@
                         </div>
                     </div>
                     <div class="item-actions">
+                        <button class="action-btn btn-like ${hasLiked ? 'curtido' : ''}" onclick="toggleLike(${index}, event)">
+                            👍 ${likes}
+                        </button>
                         <button class="action-btn btn-complete" onclick="toggleComplete(${index}, event)">
                             ${item.completed ? '✅ Concluída' : '⭕ Concluir'}
                         </button>
@@ -329,6 +351,23 @@
             `;
             container.appendChild(div);
         });
+    }
+
+    async function toggleLike(index, e) {
+        e.stopPropagation();
+        const item = currentData[index];
+        item.likes = item.likes || 0;
+        item.likedBy = item.likedBy || [];
+
+        const ipIndex = item.likedBy.indexOf(userIP);
+        if (ipIndex > -1) {
+            item.likedBy.splice(ipIndex, 1);
+            item.likes--;
+        } else {
+            item.likedBy.push(userIP);
+            item.likes++;
+        }
+        await pushToBin(currentData);
     }
 
     async function toggleComplete(index, event) {
@@ -346,12 +385,16 @@
             category: cat === 'Outro' ? document.getElementById('customCategory').value : cat,
             description: document.getElementById('description').value,
             date: new Date().toISOString(),
-            completed: false
+            completed: false,
+            likes: 0,
+            likedBy: []
         };
 
         const idx = parseInt(document.getElementById('editIndex').value);
         if (idx >= 0) {
             formData.completed = currentData[idx].completed;
+            formData.likes = currentData[idx].likes || 0;
+            formData.likedBy = currentData[idx].likedBy || [];
             currentData[idx] = formData;
         } else {
             currentData.unshift(formData);
@@ -398,7 +441,10 @@
         icon.textContent = next === 'dark' ? '☀️' : '🌙';
     }
 
-    fetchSuggestions();
+    (async () => {
+        await getUserIP();
+        await fetchSuggestions();
+    })();
 </script>
 </body>
 </html>
