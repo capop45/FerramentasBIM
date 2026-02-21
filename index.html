@@ -257,17 +257,19 @@
     const API_KEY = '$2a$10$T3C70qhYrKZMczxOir2xUeypvmxIZ89FRuioGyxBSh/gZorc4iBAy'; 
 
     let currentData = [];
-    let userIP = '';
 
-    async function getUserIP() {
-        try {
-            const res = await fetch('https://api.ipify.org?format=json');
-            const data = await res.json();
-            userIP = data.ip;
-        } catch (e) {
-            userIP = 'unknown-' + Math.random().toString(16).slice(2);
+    function getOrCreateUserID() {
+        let id = localStorage.getItem('bim_userID');
+        if (!id) {
+            id = (typeof crypto.randomUUID === 'function') 
+                ? crypto.randomUUID() 
+                : 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('bim_userID', id);
         }
+        return id;
     }
+
+    const currentUserID = getOrCreateUserID();
 
     function exportToExcel() {
         if (typeof XLSX === 'undefined' || currentData.length === 0) return alert("Erro no carregamento ou lista vazia.");
@@ -316,15 +318,16 @@
         const container = document.getElementById('suggestionsList');
         container.innerHTML = list.length === 0 ? '<div class="empty-state">Nenhum registro encontrado.</div>' : '';
 
-        // "A mandinga" para ordenar preservando o index original do array real
-        const sortedList = list
-            .map((item, index) => ({ ...item, originalIndex: index }))
-            .sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        // Preservamos o acesso ao array original via mapeamento de IDs ou índices antes de ordenar
+        const indexedList = list.map((item, idx) => ({ ...item, originalIndex: idx }));
+        
+        // Ordenação por curtidas (Ranking)
+        indexedList.sort((a, b) => (b.likes || 0) - (a.likes || 0));
 
-        sortedList.forEach((item) => {
+        indexedList.forEach((item) => {
             const likes = item.likes || 0;
             const likedBy = item.likedBy || [];
-            const hasLiked = likedBy.includes(userIP);
+            const hasLiked = likedBy.includes(currentUserID);
             const index = item.originalIndex;
 
             const div = document.createElement('div');
@@ -358,18 +361,18 @@
         });
     }
 
-    async function toggleLike(index, e) {
-        e.stopPropagation();
+    async function toggleLike(index, event) {
+        event.stopPropagation();
         const item = currentData[index];
         item.likes = item.likes || 0;
         item.likedBy = item.likedBy || [];
 
-        const ipIndex = item.likedBy.indexOf(userIP);
-        if (ipIndex > -1) {
-            item.likedBy.splice(ipIndex, 1);
-            item.likes--;
+        const userIdx = item.likedBy.indexOf(currentUserID);
+        if (userIdx > -1) {
+            item.likedBy.splice(userIdx, 1);
+            item.likes = Math.max(0, item.likes - 1);
         } else {
-            item.likedBy.push(userIP);
+            item.likedBy.push(currentUserID);
             item.likes++;
         }
         await pushToBin(currentData);
@@ -400,7 +403,7 @@
             formData.completed = currentData[idx].completed;
             formData.likes = currentData[idx].likes || 0;
             formData.likedBy = currentData[idx].likedBy || [];
-            formData.date = currentData[idx].date;
+            formData.date = currentData[idx].date || formData.date;
             currentData[idx] = formData;
         } else {
             currentData.unshift(formData);
@@ -447,10 +450,7 @@
         icon.textContent = next === 'dark' ? '☀️' : '🌙';
     }
 
-    (async () => {
-        await getUserIP();
-        await fetchSuggestions();
-    })();
+    fetchSuggestions();
 </script>
 </body>
 </html>
