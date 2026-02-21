@@ -130,7 +130,6 @@
             overflow: hidden;
         }
 
-        /* Estilo Concluído */
         .suggestion-item.completed {
             border-color: var(--success-color);
             background-color: var(--success-bg);
@@ -167,7 +166,6 @@
         .btn-complete { border-color: var(--border-color); }
         .completed .btn-complete { color: var(--success-color); border-color: var(--success-color); }
 
-        /* Estilo Like */
         .btn-like { border: 1px solid var(--border-color); }
         .btn-like.curtido { color: var(--accent-color); border-color: var(--accent-color); background-color: rgba(14, 165, 233, 0.1); }
 
@@ -273,8 +271,9 @@
 
     function exportToExcel() {
         if (typeof XLSX === 'undefined' || currentData.length === 0) return alert("Erro no carregamento ou lista vazia.");
-        const dataForExcel = currentData.map(item => [item.title, item.category, item.author, new Date(item.date).toLocaleString('pt-BR'), item.completed ? "Sim" : "Não", item.description]);
-        const header = ["Título", "Categoria", "Responsável", "Data", "Concluído", "Descrição"];
+        const sortedForExcel = [...currentData].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        const dataForExcel = sortedForExcel.map(item => [item.title, item.category, item.author, new Date(item.date).toLocaleString('pt-BR'), item.completed ? "Sim" : "Não", item.likes || 0, item.description]);
+        const header = ["Título", "Categoria", "Responsável", "Data", "Concluído", "Curtidas", "Descrição"];
         dataForExcel.unshift(header);
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(dataForExcel);
@@ -317,10 +316,16 @@
         const container = document.getElementById('suggestionsList');
         container.innerHTML = list.length === 0 ? '<div class="empty-state">Nenhum registro encontrado.</div>' : '';
 
-        list.forEach((item, index) => {
+        // "A mandinga" para ordenar preservando o index original do array real
+        const sortedList = list
+            .map((item, index) => ({ ...item, originalIndex: index }))
+            .sort((a, b) => (b.likes || 0) - (a.likes || 0));
+
+        sortedList.forEach((item) => {
             const likes = item.likes || 0;
             const likedBy = item.likedBy || [];
             const hasLiked = likedBy.includes(userIP);
+            const index = item.originalIndex;
 
             const div = document.createElement('div');
             div.className = `suggestion-item ${item.completed ? 'completed' : ''}`;
@@ -395,6 +400,7 @@
             formData.completed = currentData[idx].completed;
             formData.likes = currentData[idx].likes || 0;
             formData.likedBy = currentData[idx].likedBy || [];
+            formData.date = currentData[idx].date;
             currentData[idx] = formData;
         } else {
             currentData.unshift(formData);
