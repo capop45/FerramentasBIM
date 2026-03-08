@@ -324,8 +324,13 @@
         // Preservamos o acesso ao array original via mapeamento de IDs ou índices antes de ordenar
         const indexedList = list.map((item, idx) => ({ ...item, originalIndex: idx }));
         
-        // Ordenação por curtidas (Ranking)
-        indexedList.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        // Ordenação por status de conclusão e depois por curtidas (Ranking)
+        indexedList.sort((a, b) => {
+            if (a.completed === b.completed) {
+                return (b.likes || 0) - (a.likes || 0);
+            }
+            return a.completed ? 1 : -1;
+        });
 
         indexedList.forEach((item) => {
             const likes = item.likes || 0;
